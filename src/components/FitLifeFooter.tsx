@@ -61,15 +61,9 @@ const FitLifeFooter = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t border-white/10 pt-8 text-center">
           <div className="text-white/60 text-sm">
-            © 2024 FitLife AI. Todos os direitos reservados.
-          </div>
-          
-          <div className="flex items-center gap-2 text-white/60 text-sm">
-            <span>Feito com</span>
-            <Heart className="w-4 h-4 text-primary-pink" />
-            <span>para sua transformação</span>
+            © 2025 - Powered by CodeJungle
           </div>
         </div>
       </div>

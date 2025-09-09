@@ -1,8 +1,11 @@
 import { ArrowRight, Play, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-fitness-ai.jpg";
 
 const FitLifeHero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -40,14 +43,21 @@ const FitLifeHero = () => {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-            <Button className="btn-primary text-lg px-8 py-4 h-auto">
+            <Button 
+              className="btn-primary text-lg px-8 py-4 h-auto"
+              onClick={() => navigate('/register')}
+            >
               <span>Começar Jornada Grátis</span>
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             
-            <Button variant="outline" className="btn-secondary text-lg px-8 py-4 h-auto">
+            <Button 
+              variant="outline" 
+              className="btn-secondary text-lg px-8 py-4 h-auto"
+              onClick={() => navigate('/login')}
+            >
               <Play className="w-5 h-5 mr-2" />
-              Ver Demonstração
+              Já sou usuário
             </Button>
           </div>
 
