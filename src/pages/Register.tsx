@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, User, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +18,14 @@ const Register = () => {
     confirmPassword: ""
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { signUp, loading, user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/profile-setup');
+    }
+  }, [user, navigate]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -32,10 +42,22 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log("Register attempt:", formData);
+    
+    if (!validateForm()) {
+      return;
+    }
+    
+    const { error } = await signUp(formData.email, formData.password, formData.name);
+    
+    if (!error) {
+      // Se não há erro, significa que o email de confirmação foi enviado
+      toast({
+        title: "Conta criada com sucesso!",
+        description: "Verifique seu email para confirmar a conta. Você pode continuar configurando seu perfil.",
+      });
+      navigate('/profile-setup');
     }
   };
 
@@ -160,8 +182,8 @@ const Register = () => {
                 )}
               </div>
 
-              <Button type="submit" className="w-full btn-primary">
-                Criar conta grátis
+              <Button type="submit" className="w-full btn-primary" disabled={loading}>
+                {loading ? "Criando conta..." : "Criar conta grátis"}
               </Button>
             </form>
 

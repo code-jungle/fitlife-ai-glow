@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import PersonalInfoStep from "@/components/profile/PersonalInfoStep";
 import ActivityLevelStep from "@/components/profile/ActivityLevelStep";
 import GoalsStep from "@/components/profile/GoalsStep";
 import RestrictionsStep from "@/components/profile/RestrictionsStep";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 
 const steps = [
   { id: 1, title: "Informações Pessoais", description: "Dados físicos básicos" },
@@ -18,6 +20,8 @@ const steps = [
 
 const ProfileSetup = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { profile, updateProfile, loading } = useProfile();
   const [currentStep, setCurrentStep] = useState(1);
   const [profileData, setProfileData] = useState({
     // Personal Info
@@ -35,15 +39,58 @@ const ProfileSetup = () => {
     dietaryRestrictions: [] as string[],
   });
 
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    // Load existing profile data if available
+    if (profile) {
+      setProfileData({
+        age: profile.age?.toString() || "",
+        gender: profile.gender || "",
+        height: profile.height?.toString() || "",
+        weight: profile.weight?.toString() || "",
+        activityLevel: profile.activity_level || "",
+        goal: profile.fitness_goal || "",
+        targetWeight: "", // This is a form field, not stored directly
+        allergies: profile.allergies || [],
+        dietaryRestrictions: profile.dietary_restrictions || [],
+      });
+    }
+  }, [user, profile, navigate]);
+
   const progress = (currentStep / steps.length) * 100;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     } else {
       // Save profile and redirect
-      console.log("Profile completed:", profileData);
-      navigate("/dashboard");
+      const profileUpdate = {
+        age: parseInt(profileData.age) || undefined,
+        gender: profileData.gender as 'male' | 'female' | 'other' || undefined,
+        height: parseFloat(profileData.height) || undefined,
+        weight: parseFloat(profileData.weight) || undefined,
+        activity_level: profileData.activityLevel as any || undefined,
+        fitness_goal: profileData.goal as any || undefined,
+        allergies: profileData.allergies,
+        dietary_restrictions: profileData.dietaryRestrictions,
+      };
+
+      // Remove undefined values
+      Object.keys(profileUpdate).forEach(key => {
+        if (profileUpdate[key as keyof typeof profileUpdate] === undefined) {
+          delete profileUpdate[key as keyof typeof profileUpdate];
+        }
+      });
+
+      const { error } = await updateProfile(profileUpdate);
+      
+      if (!error) {
+        navigate("/dashboard");
+      }
     }
   };
 
@@ -145,8 +192,9 @@ const ProfileSetup = () => {
           <Button
             onClick={handleNext}
             className="btn-primary"
+            disabled={loading}
           >
-            {currentStep === steps.length ? "Finalizar" : "Próximo"}
+            {loading ? "Salvando..." : currentStep === steps.length ? "Finalizar" : "Próximo"}
             <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
