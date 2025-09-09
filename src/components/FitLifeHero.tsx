@@ -1,7 +1,6 @@
 import { ArrowRight, Play, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import heroImage from "@/assets/hero-fitness-ai.jpg";
 
 const FitLifeHero = () => {
   const navigate = useNavigate();
@@ -11,8 +10,8 @@ const FitLifeHero = () => {
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src={heroImage} 
-          alt="FitLife AI - Treinos personalizados com inteligência artificial" 
+          src="/lovable-uploads/079347ff-99da-4b90-a2e1-f6e9509959fb.png" 
+          alt="FitLife AI - Equipamentos fitness com tecnologia inteligente" 
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-background/90" />
