@@ -25,18 +25,11 @@ const FitLifePricing = () => {
           <Card className="glass-card p-8 border-2 border-primary/20 relative">
             {/* Popular Badge */}
             <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-              <div className="glass-card px-4 py-2 border border-primary/30">
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-primary fill-current" />
-                  <span className="text-sm font-medium text-white">Mais Popular</span>
-                </div>
-              </div>
+              
             </div>
 
             <div className="text-center mb-8">
-              <h3 className="font-poppins font-bold text-2xl mb-4 text-white">
-                FitLife AI Premium
-              </h3>
+              
               
               <div className="mb-6">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -54,12 +47,11 @@ const FitLifePricing = () => {
             {/* Features */}
             <div className="space-y-4 mb-8">
               {[
-                "Treinos personalizados ilimitados",
-                "Planos nutricionais adaptativos",
-                "IA personal trainer 24/7",
+                "Sugestões de treinos personalizados ilimitados",
+                "Sugestões nutricionais adaptativos",
                 "Acompanhamento de progresso",
                 "Sem anúncios",
-                "Suporte prioritário"
+                
               ].map((feature, index) => (
                 <div key={index} className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-gradient-primary flex items-center justify-center flex-shrink-0">

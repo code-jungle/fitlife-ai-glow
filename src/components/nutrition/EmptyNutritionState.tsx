@@ -73,9 +73,7 @@ const EmptyNutritionState = ({
           </Button>
 
           {/* Secondary Text */}
-          <p className="text-xs text-muted-foreground">
-            🥗 Criado por nutricionista IA especializada
-          </p>
+          
         </div>
       </CardContent>
     </Card>

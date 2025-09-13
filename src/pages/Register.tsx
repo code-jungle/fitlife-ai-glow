@@ -23,7 +23,7 @@ const Register = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/profile-setup');
+      navigate('/dashboard');
     }
   }, [user, navigate]);
 

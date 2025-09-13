@@ -73,9 +73,7 @@ const EmptyWorkoutState = ({
           </Button>
 
           {/* Secondary Text */}
-          <p className="text-xs text-muted-foreground">
-            ⚡ Gerado em segundos pela nossa IA especializada
-          </p>
+          
         </div>
       </CardContent>
     </Card>

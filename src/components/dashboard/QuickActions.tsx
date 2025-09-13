@@ -1,4 +1,4 @@
-import { Dumbbell, Apple, Sparkles } from "lucide-react";
+import { Dumbbell, Apple, Sparkles, Target, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -19,6 +19,20 @@ const QuickActions = () => {
       href: "/nutrition",
       gradient: "from-green-500 to-teal-500",
     },
+    {
+      title: "Gerenciar Metas",
+      description: "Acompanhe e defina suas metas de fitness",
+      icon: Target,
+      href: "/goals",
+      gradient: "from-purple-500 to-indigo-500",
+    },
+    {
+      title: "Editar Perfil",
+      description: "Atualize suas informações pessoais",
+      icon: User,
+      href: "/profile",
+      gradient: "from-blue-500 to-cyan-500",
+    },
   ];
 
   return (
@@ -27,7 +41,7 @@ const QuickActions = () => {
         Ações Rápidas
       </h2>
       
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {actions.map((action, index) => (
           <Card key={index} className="glass-card border border-white/10 hover-lift">
             <CardHeader>

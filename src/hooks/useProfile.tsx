@@ -13,6 +13,7 @@ export interface UserProfile {
   gender?: 'male' | 'female' | 'other';
   activity_level?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
   fitness_goal?: 'lose_weight' | 'gain_muscle' | 'maintain_weight' | 'improve_endurance' | 'general_fitness';
+  gym_days_per_week?: number;
   dietary_restrictions?: string[];
   allergies?: string[];
   target_calories?: number;

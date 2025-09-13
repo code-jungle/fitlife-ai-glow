@@ -1,15 +1,19 @@
-import { Bell, Settings, User, Dumbbell } from "lucide-react";
+import { Bell, Settings, User, Dumbbell, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const DashboardHeader = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
+  };
   
-  const navigation = [
-    { name: "Dashboard", href: "/dashboard", icon: null },
-    { name: "Treinos", href: "/workouts", icon: null },
-    { name: "Alimentação", href: "/nutrition", icon: null },
-  ];
+ 
 
   return (
     <header className="sticky top-0 z-50 glass border-b border-white/10 backdrop-blur-xl">
@@ -25,30 +29,19 @@ const DashboardHeader = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={`btn-ghost ${
-                location.pathname === item.href ? "text-white" : ""
-              }`}
-            >
-              {item.name}
-            </Link>
-          ))}
-        </nav>
+       
 
         {/* Right Actions */}
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" className="btn-ghost">
-            <Bell className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="sm" className="btn-ghost">
-            <Settings className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="sm" className="btn-ghost">
-            <User className="w-5 h-5" />
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="btn-secondary"
+            onClick={handleLogout}
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Sair
           </Button>
         </div>
       </div>

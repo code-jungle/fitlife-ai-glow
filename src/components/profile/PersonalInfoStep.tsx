@@ -17,7 +17,9 @@ const PersonalInfoStep = ({ data, updateData }: PersonalInfoStepProps) => {
     <div className="space-y-6">
       {/* Gender Selection */}
       <div className="space-y-3">
-        <Label className="text-foreground font-medium">Gênero</Label>
+        <Label className="text-foreground font-medium">
+          Gênero <span className="text-red-500">*</span>
+        </Label>
         <div className="grid grid-cols-2 gap-3">
           <Button
             type="button"
@@ -42,7 +44,9 @@ const PersonalInfoStep = ({ data, updateData }: PersonalInfoStepProps) => {
 
       {/* Age */}
       <div className="space-y-2">
-        <Label htmlFor="age" className="text-foreground">Idade</Label>
+        <Label htmlFor="age" className="text-foreground">
+          Idade <span className="text-red-500">*</span>
+        </Label>
         <div className="relative">
           <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
@@ -60,7 +64,9 @@ const PersonalInfoStep = ({ data, updateData }: PersonalInfoStepProps) => {
 
       {/* Height */}
       <div className="space-y-2">
-        <Label htmlFor="height" className="text-foreground">Altura (cm)</Label>
+        <Label htmlFor="height" className="text-foreground">
+          Altura (cm) <span className="text-red-500">*</span>
+        </Label>
         <div className="relative">
           <Ruler className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
@@ -78,7 +84,9 @@ const PersonalInfoStep = ({ data, updateData }: PersonalInfoStepProps) => {
 
       {/* Weight */}
       <div className="space-y-2">
-        <Label htmlFor="weight" className="text-foreground">Peso (kg)</Label>
+        <Label htmlFor="weight" className="text-foreground">
+          Peso (kg) <span className="text-red-500">*</span>
+        </Label>
         <div className="relative">
           <Weight className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input

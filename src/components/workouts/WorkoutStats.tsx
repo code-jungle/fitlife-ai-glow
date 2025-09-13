@@ -1,22 +1,28 @@
 import { TrendingUp, Clock, Target, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { WorkoutPlan } from "@/hooks/useWorkouts";
 
 interface WorkoutStatsProps {
-  workouts: Array<{
-    id: number;
-    duration: number;
-    difficulty: string;
-    createdAt: string;
-  }>;
+  workouts: WorkoutPlan[];
 }
 
 const WorkoutStats = ({ workouts }: WorkoutStatsProps) => {
+  const getDifficultyText = (level: number) => {
+    if (level <= 1) return "Iniciante";
+    if (level <= 2) return "Fácil";
+    if (level <= 3) return "Intermediário";
+    if (level <= 4) return "Avançado";
+    return "Expert";
+  };
+
   const totalWorkouts = workouts.length;
-  const totalMinutes = workouts.reduce((sum, workout) => sum + workout.duration, 0);
+  const totalMinutes = workouts.reduce((sum, workout) => sum + (workout.duration_minutes || 0), 0);
   const avgDuration = totalWorkouts > 0 ? Math.round(totalMinutes / totalWorkouts) : 0;
   
   const difficultyStats = workouts.reduce((acc, workout) => {
-    acc[workout.difficulty] = (acc[workout.difficulty] || 0) + 1;
+    const level = workout.difficulty_level || 1;
+    const difficultyText = getDifficultyText(level);
+    acc[difficultyText] = (acc[difficultyText] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 

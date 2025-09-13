@@ -1,23 +1,22 @@
-import { Activity, Target, TrendingUp, User, Dumbbell, Apple, AlertCircle, ArrowRight } from "lucide-react";
+import { Activity, Target, TrendingUp, User, Dumbbell, Apple } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatsGrid from "@/components/dashboard/StatsGrid";
 import QuickActions from "@/components/dashboard/QuickActions";
+import ProfileIncompleteBanner from "@/components/ProfileIncompleteBanner";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useWorkouts } from "@/hooks/useWorkouts";
 import { useNutrition } from "@/hooks/useNutrition";
 import { useProfileValidation } from "@/hooks/useProfileValidation";
-import { useNavigate } from "react-router-dom";
 
-const Dashboard = () => {
+const DashboardWithBanner = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { workoutPlans } = useWorkouts();
   const { nutritionPlans } = useNutrition();
   const { isProfileComplete, loading: profileLoading } = useProfileValidation({ redirectOnIncomplete: false });
-  const navigate = useNavigate();
 
   // Show loading while checking profile
   if (profileLoading) {
@@ -45,42 +44,18 @@ const Dashboard = () => {
           </p>
         </div>
 
-        {/* Profile Incomplete Banner */}
-        {!isProfileComplete && (
-          <div className="mb-8 p-6 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                <AlertCircle className="w-5 h-5 text-amber-500" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Complete seu perfil para uma experiência personalizada
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  Para gerar treinos e planos nutricionais personalizados, precisamos de algumas informações sobre você.
-                </p>
-                <Button 
-                  onClick={() => navigate('/profile-setup')}
-                  className="btn-primary"
-                >
-                  Completar Perfil
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Show banner if profile is incomplete */}
+        {!isProfileComplete && <ProfileIncompleteBanner />}
 
         {/* Stats Grid */}
         <StatsGrid />
         
         {/* Quick Actions */}
         <QuickActions />
-
-
+        
       </main>
     </div>
   );
 };
 
-export default Dashboard;
+export default DashboardWithBanner;

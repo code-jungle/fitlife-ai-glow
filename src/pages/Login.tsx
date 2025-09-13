@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfileValidation } from "@/hooks/useProfileValidation";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,20 +15,26 @@ const Login = () => {
     password: ""
   });
   const { signIn, loading, user } = useAuth();
+  const { isProfileComplete, loading: profileLoading } = useProfileValidation({ skipValidation: false });
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
+    if (user && !profileLoading) {
+      if (isProfileComplete) {
+        navigate('/dashboard');
+      } else {
+        navigate('/profile-setup');
+      }
     }
-  }, [user, navigate]);
+  }, [user, isProfileComplete, profileLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const { error } = await signIn(formData.email, formData.password);
     
-    if (!error) {
-      navigate('/dashboard');
+    // The useEffect will handle navigation based on profile completeness
+    if (error) {
+      console.error('Login error:', error);
     }
   };
 

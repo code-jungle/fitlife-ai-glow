@@ -48,7 +48,7 @@ const GoalsStep = ({ data, updateData }: GoalsStepProps) => {
     <div className="space-y-6">
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-foreground mb-2">
-          Qual é seu objetivo principal?
+          Qual é seu objetivo principal? <span className="text-red-500">*</span>
         </h3>
         <p className="text-muted-foreground">
           Isso define o tipo de treino e dieta que vamos recomendar

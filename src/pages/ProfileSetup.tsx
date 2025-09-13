@@ -10,6 +10,8 @@ import GoalsStep from "@/components/profile/GoalsStep";
 import RestrictionsStep from "@/components/profile/RestrictionsStep";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useProfileValidation } from "@/hooks/useProfileValidation";
+import { toast } from "@/hooks/use-toast";
 
 const steps = [
   { id: 1, title: "Informações Pessoais", description: "Dados físicos básicos" },
@@ -22,6 +24,7 @@ const ProfileSetup = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, updateProfile, loading } = useProfile();
+  const { isProfileComplete, loading: profileValidationLoading } = useProfileValidation({ skipValidation: true });
   const [currentStep, setCurrentStep] = useState(1);
   const [profileData, setProfileData] = useState({
     // Personal Info
@@ -31,6 +34,7 @@ const ProfileSetup = () => {
     weight: "",
     // Activity Level
     activityLevel: "",
+    gymDaysPerWeek: "",
     // Goals
     goal: "",
     targetWeight: "",
@@ -42,6 +46,12 @@ const ProfileSetup = () => {
   useEffect(() => {
     if (!user) {
       navigate('/login');
+      return;
+    }
+
+    // If profile is already complete, redirect to dashboard
+    if (!profileValidationLoading && isProfileComplete) {
+      navigate('/dashboard');
       return;
     }
 
@@ -59,11 +69,74 @@ const ProfileSetup = () => {
         dietaryRestrictions: profile.dietary_restrictions || [],
       });
     }
-  }, [user, profile, navigate]);
+  }, [user, profile, navigate, isProfileComplete, profileValidationLoading]);
 
   const progress = (currentStep / steps.length) * 100;
 
+  // Show loading while checking if profile is complete
+  if (profileValidationLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white/70">Verificando perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const validateStep = (step: number): { isValid: boolean; message?: string } => {
+    switch (step) {
+      case 1: // Personal Info
+        if (!profileData.age || !profileData.gender || !profileData.height || !profileData.weight) {
+          return { isValid: false, message: "Todos os campos da etapa 1 são obrigatórios" };
+        }
+        if (parseInt(profileData.age) < 13 || parseInt(profileData.age) > 120) {
+          return { isValid: false, message: "Idade deve estar entre 13 e 120 anos" };
+        }
+        if (parseFloat(profileData.height) < 100 || parseFloat(profileData.height) > 250) {
+          return { isValid: false, message: "Altura deve estar entre 100 e 250 cm" };
+        }
+        if (parseFloat(profileData.weight) < 30 || parseFloat(profileData.weight) > 300) {
+          return { isValid: false, message: "Peso deve estar entre 30 e 300 kg" };
+        }
+        return { isValid: true };
+      
+      case 2: // Activity Level
+        if (!profileData.activityLevel) {
+          return { isValid: false, message: "Nível de atividade é obrigatório" };
+        }
+        if (!profileData.gymDaysPerWeek || parseInt(profileData.gymDaysPerWeek) < 1 || parseInt(profileData.gymDaysPerWeek) > 7) {
+          return { isValid: false, message: "Dias na academia deve estar entre 1 e 7" };
+        }
+        return { isValid: true };
+      
+      case 3: // Goals
+        if (!profileData.goal) {
+          return { isValid: false, message: "Objetivo fitness é obrigatório" };
+        }
+        return { isValid: true };
+      
+      case 4: // Restrictions (optional)
+        return { isValid: true };
+      
+      default:
+        return { isValid: true };
+    }
+  };
+
   const handleNext = async () => {
+    // Validate current step before proceeding
+    const validation = validateStep(currentStep);
+    if (!validation.isValid) {
+      toast({
+        title: "Campos obrigatórios",
+        description: validation.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -74,6 +147,7 @@ const ProfileSetup = () => {
         height: parseFloat(profileData.height) || undefined,
         weight: parseFloat(profileData.weight) || undefined,
         activity_level: profileData.activityLevel as any || undefined,
+        gym_days_per_week: parseInt(profileData.gymDaysPerWeek) || undefined,
         fitness_goal: profileData.goal as any || undefined,
         allergies: profileData.allergies,
         dietary_restrictions: profileData.dietaryRestrictions,
@@ -192,7 +266,7 @@ const ProfileSetup = () => {
           <Button
             onClick={handleNext}
             className="btn-primary"
-            disabled={loading}
+            disabled={loading || !validateStep(currentStep).isValid}
           >
             {loading ? "Salvando..." : currentStep === steps.length ? "Finalizar" : "Próximo"}
             <ChevronRight className="w-4 h-4 ml-2" />

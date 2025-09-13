@@ -79,6 +79,25 @@ const NutritionGenerator = () => {
           </div>
         </div>
 
+        {/* Disclaimer */}
+        <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+          <div className="flex items-start gap-3">
+            <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-amber-500 text-sm">⚠️</span>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-foreground">
+                Aviso Importante
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Este plano nutricional é uma <strong>sugestão personalizada</strong> gerada por IA com base no seu perfil. 
+                Não substitui orientação de profissionais qualificados. Consulte um nutricionista ou médico 
+                antes de seguir qualquer plano alimentar.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* AI Features */}
         <div className="grid grid-cols-3 gap-4 pt-4">
           <div className="text-center space-y-2">

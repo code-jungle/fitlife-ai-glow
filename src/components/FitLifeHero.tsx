@@ -22,10 +22,7 @@ const FitLifeHero = () => {
       <div className="relative z-10 container mx-auto px-4 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 glass-card px-4 py-2 text-sm">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-white/90">Powered by Artificial Intelligence</span>
-          </div>
+          
 
           {/* Main Heading */}
           <div className="space-y-4">
@@ -61,33 +58,12 @@ const FitLifeHero = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-16">
-            <div className="glass-card p-6 text-center hover-lift">
-              <div className="text-3xl font-bold gradient-text mb-2">50K+</div>
-              <div className="text-white/70 text-sm">Usuários Ativos</div>
-            </div>
-            <div className="glass-card p-6 text-center hover-lift">
-              <div className="text-3xl font-bold gradient-text mb-2">1M+</div>
-              <div className="text-white/70 text-sm">Treinos Gerados</div>
-            </div>
-            <div className="glass-card p-6 text-center hover-lift">
-              <div className="text-3xl font-bold gradient-text mb-2">98%</div>
-              <div className="text-white/70 text-sm">Satisfação</div>
-            </div>
-            <div className="glass-card p-6 text-center hover-lift">
-              <div className="text-3xl font-bold gradient-text mb-2">24/7</div>
-              <div className="text-white/70 text-sm">IA Disponível</div>
-            </div>
-          </div>
+          
         </div>
       </div>
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-gradient-primary rounded-full mt-2 animate-pulse" />
-        </div>
-      </div>
+      
     </section>
   );
 };

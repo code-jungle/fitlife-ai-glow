@@ -1,6 +1,8 @@
-import { Activity, Users, Zap, Target } from "lucide-react";
+import { Activity, Users, Zap, Target, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ActivityLevelStepProps {
   data: any;
@@ -51,7 +53,7 @@ const ActivityLevelStep = ({ data, updateData }: ActivityLevelStepProps) => {
     <div className="space-y-4">
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-foreground mb-2">
-          Qual seu nível de atividade física?
+          Qual seu nível de atividade física? <span className="text-red-500">*</span>
         </h3>
         <p className="text-muted-foreground">
           Isso nos ajuda a calcular suas necessidades calóricas
@@ -89,6 +91,40 @@ const ActivityLevelStep = ({ data, updateData }: ActivityLevelStepProps) => {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Gym Days per Week */}
+      <div className="mt-8 space-y-4">
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            Quantos dias por semana você vai à academia? <span className="text-red-500">*</span>
+          </h3>
+          <p className="text-muted-foreground">
+            Isso nos ajuda a gerar a quantidade ideal de treinos para você
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="gymDays" className="text-foreground">
+            Dias na academia por semana
+          </Label>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              id="gymDays"
+              type="number"
+              placeholder="3"
+              className="pl-10 glass bg-white/5 border-white/10 text-foreground"
+              value={data.gymDaysPerWeek || ""}
+              onChange={(e) => updateData({ ...data, gymDaysPerWeek: e.target.value })}
+              min="1"
+              max="7"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Recomendamos entre 3-5 dias por semana para melhores resultados
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -1,126 +1,160 @@
-import { Clock, Target, Dumbbell, Play, Heart, MoreHorizontal } from "lucide-react";
+import { Clock, Dumbbell, Trash2, Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { WorkoutPlan, useWorkouts } from "@/hooks/useWorkouts";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface WorkoutCardProps {
-  workout: {
-    id: number;
-    title: string;
-    duration: number;
-    exercises: number;
-    difficulty: string;
-    muscleGroups: string[];
-    createdAt: string;
-    exercises_detail?: Array<{
-      name: string;
-      sets: number;
-      reps: string;
-      rest: string;
-      equipment: string;
-      muscleGroup: string;
-    }>;
-  };
+  workout: WorkoutPlan;
 }
 
 const WorkoutCard = ({ workout }: WorkoutCardProps) => {
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty.toLowerCase()) {
-      case "iniciante":
-        return "bg-green-500/20 text-green-400 border-green-500/30";
-      case "intermediário":
-        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-      case "avançado":
-        return "bg-red-500/20 text-red-400 border-red-500/30";
-      default:
-        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+  const { deleteWorkout } = useWorkouts();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+
+  const handleDeleteWorkout = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteWorkout(workout.id);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  const getMuscleGroupColor = (group: string) => {
-    const colors = [
-      "bg-orange-500/20 text-orange-400",
-      "bg-pink-500/20 text-pink-400", 
-      "bg-purple-500/20 text-purple-400",
-      "bg-blue-500/20 text-blue-400",
-      "bg-green-500/20 text-green-400",
-    ];
-    return colors[group.length % colors.length];
+
+  // Extrair letra do treino (A, B, C) do título
+  const getWorkoutLetter = (title: string) => {
+    const match = title.match(/treino\s+([a-c])/i);
+    return match ? match[1].toUpperCase() : 'A';
   };
+
+  // Obter grupos musculares principais
+  const getMainMuscleGroups = () => {
+    if (!workout.muscle_groups || workout.muscle_groups.length === 0) {
+      return ['Treino Geral'];
+    }
+    return workout.muscle_groups.slice(0, 2).join(' e ');
+  };
+
+
+  const workoutLetter = getWorkoutLetter(workout.title);
+  const mainMuscleGroups = getMainMuscleGroups();
 
   return (
     <Card className="glass-card border border-white/10 hover-lift group">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-lg font-poppins text-foreground mb-2 group-hover:gradient-text transition-all">
-              {workout.title}
-            </CardTitle>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
-                {workout.duration} min
-              </span>
-              <span className="flex items-center gap-1">
-                <Dumbbell className="w-4 h-4" />
-                {workout.exercises} exercícios
-              </span>
+      <CardHeader className="pb-3">
+        {/* Header com letra do treino e tipo */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-xl">{workoutLetter}</span>
+            </div>
+            <div>
+              <CardTitle className="text-xl font-poppins gradient-text">
+                Treino {workoutLetter}
+              </CardTitle>
+              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                <Target className="w-4 h-4" />
+                {mainMuscleGroups}
+              </p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <MoreHorizontal className="w-4 h-4" />
-          </Button>
+          
+          {/* Delete Button */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="btn-destructive hover:bg-red-500/20 hover:border-red-500/50"
+                disabled={isDeleting}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Excluir Treino</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Tem certeza que deseja excluir este treino? Esta ação não pode ser desfeita.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleDeleteWorkout}
+                  className="bg-red-600 hover:bg-red-700"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Excluindo..." : "Excluir"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
-        
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2 mt-3">
-          <Badge className={`text-xs ${getDifficultyColor(workout.difficulty)}`}>
-            {workout.difficulty}
-          </Badge>
-          {workout.muscleGroups.map((group, index) => (
-            <Badge key={index} className={`text-xs ${getMuscleGroupColor(group)}`}>
-              {group}
-            </Badge>
-          ))}
+
+        {/* Informações básicas */}
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <Clock className="w-4 h-4" />
+            {workout.duration_minutes || 0} min
+          </span>
+          <span className="flex items-center gap-1">
+            <Dumbbell className="w-4 h-4" />
+            {workout.exercises?.length || 0} exercícios
+          </span>
         </div>
       </CardHeader>
 
-      <CardContent>
-        {/* Exercise Preview */}
-        {workout.exercises_detail && workout.exercises_detail.length > 0 && (
-          <div className="mb-4 space-y-2">
-            <h4 className="text-sm font-medium text-foreground">Exercícios:</h4>
-            <div className="space-y-1">
-              {workout.exercises_detail.slice(0, 2).map((exercise, index) => (
-                <div key={index} className="text-sm text-muted-foreground flex justify-between">
-                  <span>{exercise.name}</span>
-                  <span>{exercise.sets}x{exercise.reps}</span>
-                </div>
-              ))}
-              {workout.exercises_detail.length > 2 && (
-                <p className="text-xs text-muted-foreground">
-                  +{workout.exercises_detail.length - 2} mais exercícios
-                </p>
-              )}
-            </div>
+      <CardContent className="pt-0">
+        {/* Lista de exercícios */}
+        {workout.exercises && workout.exercises.length > 0 && (
+          <div className="mb-6">
+            <h4 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+              <Dumbbell className="w-4 h-4" />
+              Exercícios
+            </h4>
+                        <div className="space-y-2">
+                          {workout.exercises.map((exercise, index) => (
+                            <div 
+                              key={exercise.id || index} 
+                              className="flex items-center justify-between p-3 rounded-lg border bg-white/5 border-white/10"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-6 h-6 bg-gradient-primary rounded-full flex items-center justify-center">
+                                  <span className="text-white text-xs font-bold">{index + 1}</span>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-foreground">
+                                    {exercise.name}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {exercise.sets} séries de {exercise.reps} repetições
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {exercise.rest_seconds}s descanso
+                              </div>
+                            </div>
+                          ))}
+                        </div>
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          <Button className="flex-1 btn-primary">
-            <Play className="w-4 h-4 mr-2" />
-            Iniciar Treino
-          </Button>
-          <Button variant="outline" size="sm" className="btn-secondary">
-            <Heart className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {/* Created Date */}
-        <p className="text-xs text-muted-foreground mt-3 text-center">
-          Criado {new Date(workout.createdAt).toLocaleDateString()}
-        </p>
       </CardContent>
     </Card>
   );

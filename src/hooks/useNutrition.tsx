@@ -129,6 +129,9 @@ export const useNutrition = () => {
 
           // Create meal foods if provided
           if (mealData.meal_foods && mealData.meal_foods.length > 0) {
+            console.log('Creating meal foods for meal:', meal.id);
+            console.log('Meal foods data:', mealData.meal_foods);
+            
             const foodsToInsert = mealData.meal_foods.map(food => ({
               meal_id: meal.id,
               food_name: food.food_name!,
@@ -140,11 +143,20 @@ export const useNutrition = () => {
               fat_per_unit: food.fat_per_unit,
             }));
 
+            console.log('Foods to insert:', foodsToInsert);
+
             const { error: foodsError } = await supabase
               .from('meal_foods')
               .insert(foodsToInsert);
 
-            if (foodsError) throw foodsError;
+            if (foodsError) {
+              console.error('Error inserting meal foods:', foodsError);
+              throw foodsError;
+            }
+            
+            console.log('Meal foods inserted successfully');
+          } else {
+            console.log('No meal foods to insert for meal:', meal.id);
           }
         }
       }
@@ -198,6 +210,95 @@ export const useNutrition = () => {
     }
   };
 
+  const deleteNutritionPlan = async (planId: string) => {
+    if (!user) return;
+
+    try {
+      // First delete related meals
+      const { error: mealsError } = await supabase
+        .from('meals')
+        .delete()
+        .eq('nutrition_plan_id', planId);
+
+      if (mealsError) throw mealsError;
+
+      // Then delete the nutrition plan
+      const { error: planError } = await supabase
+        .from('nutrition_plans')
+        .delete()
+        .eq('id', planId)
+        .eq('user_id', user.id);
+
+      if (planError) throw planError;
+
+      await fetchNutritionPlans();
+      
+      toast({
+        title: "Plano excluído!",
+        description: "O plano nutricional foi removido com sucesso",
+      });
+    } catch (error) {
+      console.error('Error deleting nutrition plan:', error);
+      toast({
+        title: "Erro ao excluir plano",
+        description: "Não foi possível excluir o plano nutricional",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteAllNutritionPlans = async () => {
+    if (!user) return;
+
+    try {
+      // Get all nutrition plans for the user
+      const { data: plans, error: fetchError } = await supabase
+        .from('nutrition_plans')
+        .select('id')
+        .eq('user_id', user.id);
+
+      if (fetchError) throw fetchError;
+
+      if (!plans || plans.length === 0) {
+        toast({
+          title: "Nenhum plano encontrado",
+          description: "Não há planos nutricionais para excluir",
+        });
+        return;
+      }
+
+      // Delete all meals first
+      const { error: mealsError } = await supabase
+        .from('meals')
+        .delete()
+        .in('nutrition_plan_id', plans.map(p => p.id));
+
+      if (mealsError) throw mealsError;
+
+      // Then delete all nutrition plans
+      const { error: plansError } = await supabase
+        .from('nutrition_plans')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (plansError) throw plansError;
+
+      await fetchNutritionPlans();
+      
+      toast({
+        title: "Todos os planos excluídos!",
+        description: `${plans.length} plano(s) nutricional(is) foi(ram) removido(s) com sucesso`,
+      });
+    } catch (error) {
+      console.error('Error deleting all nutrition plans:', error);
+      toast({
+        title: "Erro ao excluir planos",
+        description: "Não foi possível excluir todos os planos nutricionais",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchNutritionPlans();
@@ -209,6 +310,8 @@ export const useNutrition = () => {
     loading,
     createNutritionPlan,
     completeNutritionPlan,
+    deleteNutritionPlan,
+    deleteAllNutritionPlans,
     refetchNutritionPlans: fetchNutritionPlans,
   };
 };

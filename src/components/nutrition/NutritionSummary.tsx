@@ -1,25 +1,18 @@
 import { TrendingUp, Target, Utensils, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { NutritionPlan } from "@/hooks/useNutrition";
 
 interface NutritionSummaryProps {
-  plans: Array<{
-    id: number;
-    totalCalories: number;
-    createdAt: string;
-    meals: Array<{
-      type: string;
-      calories: number;
-    }>;
-  }>;
+  plans: NutritionPlan[];
 }
 
 const NutritionSummary = ({ plans }: NutritionSummaryProps) => {
   const totalPlans = plans.length;
   const avgCalories = totalPlans > 0 
-    ? Math.round(plans.reduce((sum, plan) => sum + plan.totalCalories, 0) / totalPlans)
+    ? Math.round(plans.reduce((sum, plan) => sum + (plan.total_calories || 0), 0) / totalPlans)
     : 0;
   
-  const totalMeals = plans.reduce((sum, plan) => sum + plan.meals.length, 0);
+  const totalMeals = plans.reduce((sum, plan) => sum + (plan.meals?.length || 0), 0);
   const avgMealsPerPlan = totalPlans > 0 ? Math.round(totalMeals / totalPlans) : 0;
 
   const stats = [

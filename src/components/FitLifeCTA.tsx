@@ -41,16 +41,7 @@ const FitLifeCTA = () => {
             </p>
 
             {/* Benefits */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12 text-left max-w-2xl mx-auto">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-gradient-primary flex items-center justify-center flex-shrink-0">
-                    <Check className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-white/90">{benefit}</span>
-                </div>
-              ))}
-            </div>
+            
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -59,9 +50,7 @@ const FitLifeCTA = () => {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
               
-              <div className="text-sm text-white/60">
-                Sem cartão de crédito • Cancelamento gratuito
-              </div>
+              
             </div>
           </Card>
         </div>

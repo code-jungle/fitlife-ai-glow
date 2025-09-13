@@ -28,6 +28,7 @@ export interface WorkoutPlan {
   muscle_groups?: string[];
   equipment_needed?: string[];
   ai_generated: boolean;
+  started_at?: string;
   completed_at?: string;
   created_at: string;
   exercises?: Exercise[];
@@ -137,6 +138,34 @@ export const useWorkouts = () => {
     }
   };
 
+  const startWorkout = async (workoutId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('workout_plans')
+        .update({ started_at: new Date().toISOString() })
+        .eq('id', workoutId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      await fetchWorkoutPlans();
+      
+      toast({
+        title: "Treino iniciado!",
+        description: "Boa sorte no seu treino!",
+      });
+    } catch (error) {
+      console.error('Error starting workout:', error);
+      toast({
+        title: "Erro ao iniciar treino",
+        description: "Não foi possível iniciar o treino",
+        variant: "destructive",
+      });
+    }
+  };
+
   const completeWorkout = async (workoutId: string) => {
     if (!user) return;
 
@@ -191,6 +220,47 @@ export const useWorkouts = () => {
     }
   };
 
+  const deleteWorkout = async (workoutId: string) => {
+    if (!user) return;
+
+    try {
+      // Primeiro deletar os exercícios relacionados
+      const { error: exercisesError } = await supabase
+        .from('exercises')
+        .delete()
+        .eq('workout_plan_id', workoutId);
+
+      if (exercisesError) throw exercisesError;
+
+      // Depois deletar o plano de treino
+      const { error: workoutError } = await supabase
+        .from('workout_plans')
+        .delete()
+        .eq('id', workoutId)
+        .eq('user_id', user.id);
+
+      if (workoutError) throw workoutError;
+      
+      toast({
+        title: "Treino excluído!",
+        description: "O treino foi removido com sucesso",
+      });
+
+      // Fazer reload rápido da página para garantir que o card desapareça
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch (error) {
+      console.error('Error deleting workout:', error);
+      
+      toast({
+        title: "Erro ao excluir treino",
+        description: "Não foi possível excluir o treino",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchWorkoutPlans();
@@ -201,7 +271,9 @@ export const useWorkouts = () => {
     workoutPlans,
     loading,
     createWorkoutPlan,
+    startWorkout,
     completeWorkout,
+    deleteWorkout,
     updateExerciseCompletion,
     refetchWorkoutPlans: fetchWorkoutPlans,
   };
