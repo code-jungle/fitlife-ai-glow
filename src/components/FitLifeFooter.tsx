@@ -15,10 +15,7 @@ const FitLifeFooter = () => {
                 FitLife AI
               </div>
             </div>
-            <p className="text-white/70 max-w-md mb-6">
-              Transforme seu corpo com treinos e nutrição personalizados por inteligência artificial. 
-              Sua jornada fitness inteligente começa aqui.
-            </p>
+            
             
             {/* Social Links */}
             <div className="flex items-center gap-4">
@@ -38,26 +35,7 @@ const FitLifeFooter = () => {
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h3 className="font-poppins font-semibold text-white mb-4">Recursos</h3>
-            <ul className="space-y-3">
-              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Treinos IA</a></li>
-              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Nutrição Personal</a></li>
-              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Acompanhamento</a></li>
-              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Comunidade</a></li>
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div>
-            <h3 className="font-poppins font-semibold text-white mb-4">Suporte</h3>
-            <ul className="space-y-3">
-              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Central de Ajuda</a></li>
-              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Contato</a></li>
-              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Privacidade</a></li>
-              <li><a href="#" className="text-white/70 hover:text-white transition-colors">Termos de Uso</a></li>
-            </ul>
-          </div>
+          
         </div>
 
         {/* Bottom Bar */}
