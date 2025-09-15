@@ -223,6 +223,10 @@ export const useWorkouts = () => {
   const deleteWorkout = async (workoutId: string) => {
     if (!user) return;
 
+    // Optimistic update - remove from UI immediately
+    const originalWorkouts = [...workoutPlans];
+    setWorkoutPlans(prev => prev.filter(workout => workout.id !== workoutId));
+
     try {
       // First delete related exercises
       const { error: exercisesError } = await supabase
@@ -240,8 +244,6 @@ export const useWorkouts = () => {
         .eq('user_id', user.id);
 
       if (workoutError) throw workoutError;
-
-      await fetchWorkoutPlans();
       
       toast({
         title: "Treino excluído!",
@@ -249,6 +251,10 @@ export const useWorkouts = () => {
       });
     } catch (error) {
       console.error('Error deleting workout:', error);
+      
+      // Revert optimistic update on error
+      setWorkoutPlans(originalWorkouts);
+      
       toast({
         title: "Erro ao excluir treino",
         description: "Não foi possível excluir o treino",
