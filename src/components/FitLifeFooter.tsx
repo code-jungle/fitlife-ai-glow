@@ -1,4 +1,5 @@
 import { Dumbbell, Heart, Instagram, Twitter, Facebook, Youtube } from "lucide-react";
+import FeedbackButton from "./FeedbackButton";
 
 const FitLifeFooter = () => {
   return (
@@ -36,6 +37,19 @@ const FitLifeFooter = () => {
 
           {/* Quick Links */}
           
+        </div>
+
+        {/* Feedback Section */}
+        <div className="border-t border-white/10 pt-8 mb-8">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Tem alguma sugestão ou feedback?
+            </h3>
+            <p className="text-white/70 text-sm mb-6">
+              Sua opinião é muito importante para melhorarmos a aplicação!
+            </p>
+            <FeedbackButton />
+          </div>
         </div>
 
         {/* Bottom Bar */}
