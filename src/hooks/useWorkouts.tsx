@@ -223,8 +223,12 @@ export const useWorkouts = () => {
   const deleteWorkout = async (workoutId: string) => {
     if (!user) return;
 
+    // Optimistic update - remove from UI immediately
+    const originalWorkouts = [...workoutPlans];
+    setWorkoutPlans(prev => prev.filter(workout => workout.id !== workoutId));
+
     try {
-      // Primeiro deletar os exercícios relacionados
+      // First delete related exercises
       const { error: exercisesError } = await supabase
         .from('exercises')
         .delete()
@@ -232,7 +236,7 @@ export const useWorkouts = () => {
 
       if (exercisesError) throw exercisesError;
 
-      // Depois deletar o plano de treino
+      // Then delete the workout plan
       const { error: workoutError } = await supabase
         .from('workout_plans')
         .delete()
@@ -245,13 +249,11 @@ export const useWorkouts = () => {
         title: "Treino excluído!",
         description: "O treino foi removido com sucesso",
       });
-
-      // Fazer reload rápido da página para garantir que o card desapareça
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
     } catch (error) {
       console.error('Error deleting workout:', error);
+      
+      // Revert optimistic update on error
+      setWorkoutPlans(originalWorkouts);
       
       toast({
         title: "Erro ao excluir treino",
