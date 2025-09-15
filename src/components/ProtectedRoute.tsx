@@ -1,22 +1,29 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfileValidation } from '@/hooks/useProfileValidation';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  skipProfileCheck?: boolean; // Para permitir acesso ao profile-setup mesmo sem perfil completo
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
+const ProtectedRoute = ({ children, skipProfileCheck = false }: ProtectedRouteProps) => {
+  const { user, loading: authLoading } = useAuth();
+  const { isProfileComplete, loading: profileLoading } = useProfileValidation({ skipValidation: skipProfileCheck });
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login');
+    if (!authLoading && !profileLoading) {
+      if (!user) {
+        navigate('/login');
+      } else if (!skipProfileCheck && !isProfileComplete) {
+        navigate('/profile-setup');
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, authLoading, profileLoading, isProfileComplete, navigate, skipProfileCheck]);
 
-  if (loading) {
+  if (authLoading || profileLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">

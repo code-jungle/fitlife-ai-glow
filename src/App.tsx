@@ -40,7 +40,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/profile-setup" element={
-              <ProtectedRoute>
+              <ProtectedRoute skipProfileCheck={true}>
                 <ProfileSetup />
               </ProtectedRoute>
             } />

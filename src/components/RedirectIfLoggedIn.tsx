@@ -1,7 +1,4 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useProfileValidation } from '@/hooks/useProfileValidation';
 
 interface RedirectIfLoggedInProps {
   children: React.ReactNode;
@@ -9,21 +6,9 @@ interface RedirectIfLoggedInProps {
 
 const RedirectIfLoggedIn = ({ children }: RedirectIfLoggedInProps) => {
   const { user, loading: authLoading } = useAuth();
-  const { isProfileComplete, loading: profileLoading } = useProfileValidation(false);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!authLoading && !profileLoading && user) {
-      if (isProfileComplete) {
-        navigate('/dashboard');
-      } else {
-        navigate('/profile-setup');
-      }
-    }
-  }, [user, authLoading, profileLoading, isProfileComplete, navigate]);
-
-  // Show loading while checking auth and profile
-  if (authLoading || profileLoading) {
+  // Show loading while checking auth
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -34,12 +19,7 @@ const RedirectIfLoggedIn = ({ children }: RedirectIfLoggedInProps) => {
     );
   }
 
-  // If user is logged in, don't render children (will redirect)
-  if (user) {
-    return null;
-  }
-
-  // If user is not logged in, render children (home page)
+  // Always render children (home page) - no automatic redirects
   return <>{children}</>;
 };
 
