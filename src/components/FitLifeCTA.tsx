@@ -37,7 +37,7 @@ const FitLifeCTA = () => {
             </h2>
 
             <p className="text-xl text-white/80 mb-12 max-w-2xl mx-auto">
-              Junte-se a milhares de pessoas que já transformaram seus corpos com nossa IA personalizada
+              Junte-se a milhares de pessoas que já transformaram seus corpos com a nossa IA personalizada
             </p>
 
             {/* Benefits */}

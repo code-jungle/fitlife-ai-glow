@@ -17,7 +17,7 @@ const FitLifePricing = () => {
             </span>
           </h2>
           <p className="text-xl text-white/80 max-w-2xl mx-auto">
-            Comece gratuitamente e descubra como nossa IA pode transformar seus resultados
+            Comece gratuitamente e descubra como nossa IA pode ajudar a transformar seus resultados
           </p>
         </div>
 
