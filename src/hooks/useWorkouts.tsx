@@ -223,10 +223,6 @@ export const useWorkouts = () => {
   const deleteWorkout = async (workoutId: string) => {
     if (!user) return;
 
-    // Optimistic update - remove from UI immediately
-    const originalWorkouts = [...workoutPlans];
-    setWorkoutPlans(prev => prev.filter(workout => workout.id !== workoutId));
-
     try {
       // First delete related exercises
       const { error: exercisesError } = await supabase
@@ -244,6 +240,8 @@ export const useWorkouts = () => {
         .eq('user_id', user.id);
 
       if (workoutError) throw workoutError;
+
+      await fetchWorkoutPlans();
       
       toast({
         title: "Treino excluído!",
@@ -251,13 +249,57 @@ export const useWorkouts = () => {
       });
     } catch (error) {
       console.error('Error deleting workout:', error);
-      
-      // Revert optimistic update on error
-      setWorkoutPlans(originalWorkouts);
-      
       toast({
         title: "Erro ao excluir treino",
         description: "Não foi possível excluir o treino",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteAllWorkouts = async () => {
+    if (!user) return;
+
+    try {
+      // First get all workout plan IDs for this user
+      const { data: workoutPlans, error: fetchError } = await supabase
+        .from('workout_plans')
+        .select('id')
+        .eq('user_id', user.id);
+
+      if (fetchError) throw fetchError;
+
+      if (workoutPlans && workoutPlans.length > 0) {
+        const workoutPlanIds = workoutPlans.map(plan => plan.id);
+
+        // Delete all exercises for these workout plans
+        const { error: exercisesError } = await supabase
+          .from('exercises')
+          .delete()
+          .in('workout_plan_id', workoutPlanIds);
+
+        if (exercisesError) throw exercisesError;
+      }
+
+      // Then delete all workout plans for this user
+      const { error: workoutsError } = await supabase
+        .from('workout_plans')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (workoutsError) throw workoutsError;
+
+      await fetchWorkoutPlans();
+      
+      toast({
+        title: "Todos os treinos excluídos!",
+        description: "Todos os treinos foram removidos com sucesso",
+      });
+    } catch (error) {
+      console.error('Error deleting all workouts:', error);
+      toast({
+        title: "Erro ao excluir treinos",
+        description: "Não foi possível excluir os treinos",
         variant: "destructive",
       });
     }
@@ -276,6 +318,7 @@ export const useWorkouts = () => {
     startWorkout,
     completeWorkout,
     deleteWorkout,
+    deleteAllWorkouts,
     updateExerciseCompletion,
     refetchWorkoutPlans: fetchWorkoutPlans,
   };
