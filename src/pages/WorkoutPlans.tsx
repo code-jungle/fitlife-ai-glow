@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StandardHeader from "@/components/StandardHeader";
@@ -14,10 +14,11 @@ import { geminiService } from "@/services/geminiService";
 import { toast } from "@/hooks/use-toast";
 
 const WorkoutPlans = () => {
-  const { workoutPlans, loading, createWorkoutPlan } = useWorkouts();
+  const { workoutPlans, loading, createWorkoutPlan, deleteAllWorkouts } = useWorkouts();
   const { profile } = useProfile();
   const { isProfileComplete, loading: profileLoading } = useProfileValidation({ redirectOnIncomplete: false });
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   // Show loading while checking profile
   if (profileLoading) {
@@ -127,7 +128,24 @@ const WorkoutPlans = () => {
         variant: "destructive",
       });
     } finally {
-    setIsGenerating(false);
+      setIsGenerating(false);
+    }
+  };
+
+  const handleDeleteAllWorkouts = async () => {
+    if (workoutPlans.length === 0) {
+      toast({
+        title: "Nenhum treino encontrado",
+        description: "Não há treinos para excluir",
+      });
+      return;
+    }
+
+    setIsDeletingAll(true);
+    try {
+      await deleteAllWorkouts();
+    } finally {
+      setIsDeletingAll(false);
     }
   };
 
@@ -470,6 +488,31 @@ const WorkoutPlans = () => {
         {/* Workout List */}
         <Tabs defaultValue="all" className="mt-8">
          
+
+          {/* Delete All Button */}
+          {workoutPlans.length > 0 && (
+            <div className="mt-4 flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDeleteAllWorkouts}
+                disabled={isDeletingAll || loading}
+                className="btn-destructive hover:bg-red-500/20 hover:border-red-500/50"
+              >
+                {isDeletingAll ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                    Excluindo...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Excluir Todos os Treinos
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
 
           <TabsContent value="all" className="mt-6">
             {loading ? (
