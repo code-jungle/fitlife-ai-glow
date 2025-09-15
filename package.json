@@ -9,7 +9,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "vercel-build": "rmdir /s /q dist 2>nul || rmdir dist 2>nul || echo dist not found && npm install && npm run build"
+    "vercel-build": "rm -rf dist && npm install && npm run build"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

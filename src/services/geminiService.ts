@@ -52,24 +52,43 @@ export interface NutritionPlan {
 }
 
 class GeminiService {
-  private async generateContent(prompt: string): Promise<string> {
-    try {
-      // Verificar se a API key está configurada
-      if (!import.meta.env.VITE_GEMINI_API_KEY) {
-        throw new Error('Chave da API do Gemini não configurada');
-      }
-
-      console.log('Enviando prompt para Gemini...');
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      console.log('Resposta recebida do Gemini:', text.substring(0, 200) + '...');
-      return text;
-    } catch (error) {
-      console.error('Erro ao gerar conteúdo com Gemini:', error);
-      throw new Error('Falha na comunicação com a IA');
+  private async generateContent(prompt: string, maxRetries: number = 3): Promise<string> {
+    // Verificar se a API key está configurada
+    if (!import.meta.env.VITE_GEMINI_API_KEY) {
+      throw new Error('Chave da API do Gemini não configurada');
     }
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Enviando prompt para Gemini... (tentativa ${attempt}/${maxRetries})`);
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        
+        console.log('Resposta recebida do Gemini:', text.substring(0, 200) + '...');
+        return text;
+      } catch (error: any) {
+        console.error(`Erro na tentativa ${attempt}:`, error);
+        
+        // Verificar se é erro 503 (Service Unavailable)
+        if (error.message?.includes('503') || error.message?.includes('overloaded')) {
+          if (attempt < maxRetries) {
+            const delay = attempt * 2000; // 2s, 4s, 6s
+            console.log(`Serviço sobrecarregado. Aguardando ${delay}ms antes da próxima tentativa...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          } else {
+            console.error('Máximo de tentativas atingido. Usando fallback...');
+            throw new Error('SERVICE_OVERLOADED');
+          }
+        }
+        
+        // Para outros erros, falha imediatamente
+        throw new Error('Falha na comunicação com a IA');
+      }
+    }
+    
+    throw new Error('Falha na comunicação com a IA');
   }
 
   private parseWorkoutPlan(text: string): WorkoutPlan {
@@ -311,8 +330,84 @@ class GeminiService {
     - Use apenas números entre 4-20 repetições por série
     `;
 
-    const response = await this.generateContent(prompt);
-    return this.parseMultipleWorkoutPlans(response);
+    try {
+      const response = await this.generateContent(prompt);
+      return this.parseMultipleWorkoutPlans(response);
+    } catch (error: any) {
+      if (error.message === 'SERVICE_OVERLOADED') {
+        console.log('Usando fallback para planos de treino...');
+        return this.generateFallbackWorkoutPlans(profile);
+      }
+      throw error;
+    }
+  }
+
+  private generateFallbackWorkoutPlans(profile: UserProfile): WorkoutPlan[] {
+    console.log('Gerando planos de treino básicos (fallback)...');
+    
+    const basePlans = [
+      {
+        name: 'Treino A - Peito e Tríceps',
+        muscle_groups: ['Peito', 'Tríceps'],
+        duration: 60,
+        exercises: [
+          { name: 'Supino reto com halteres', sets: 4, reps: 8, rest: 90, instructions: 'Deite no banco, segure os halteres e empurre para cima' },
+          { name: 'Flexão de braço', sets: 3, reps: 12, rest: 60, instructions: 'Mantenha o corpo alinhado e desça até quase tocar o chão' },
+          { name: 'Crucifixo com halteres', sets: 3, reps: 12, rest: 60, instructions: 'Deite no banco e abra os braços em movimento de crucifixo' },
+          { name: 'Tríceps testa', sets: 3, reps: 10, rest: 60, instructions: 'Deite no banco e desça o haltere em direção à testa' },
+          { name: 'Tríceps coice', sets: 3, reps: 12, rest: 45, instructions: 'Incline o corpo e estenda o braço para trás' },
+          { name: 'Mergulho no banco', sets: 3, reps: 10, rest: 60, instructions: 'Apoie as mãos no banco e desça o corpo' }
+        ]
+      },
+      {
+        name: 'Treino B - Costas e Bíceps',
+        muscle_groups: ['Costas', 'Bíceps'],
+        duration: 60,
+        exercises: [
+          { name: 'Puxada frontal', sets: 4, reps: 8, rest: 90, instructions: 'Puxe a barra em direção ao peito, contraindo as costas' },
+          { name: 'Remada curvada', sets: 4, reps: 10, rest: 90, instructions: 'Incline o tronco e puxe os halteres em direção ao abdômen' },
+          { name: 'Puxada alta', sets: 3, reps: 12, rest: 60, instructions: 'Puxe a barra em direção ao peito, focando nas costas' },
+          { name: 'Rosca bíceps', sets: 3, reps: 12, rest: 60, instructions: 'Mantenha os cotovelos fixos e flexione os braços' },
+          { name: 'Rosca martelo', sets: 3, reps: 12, rest: 45, instructions: 'Segure os halteres como martelos e flexione os braços' },
+          { name: 'Rosca concentrada', sets: 3, reps: 10, rest: 45, instructions: 'Sente-se e faça a rosca apoiando o cotovelo na coxa' }
+        ]
+      },
+      {
+        name: 'Treino C - Pernas e Ombros',
+        muscle_groups: ['Pernas', 'Ombros'],
+        duration: 65,
+        exercises: [
+          { name: 'Agachamento', sets: 4, reps: 12, rest: 90, instructions: 'Desça como se fosse sentar, mantendo o peso nos calcanhares' },
+          { name: 'Afundo', sets: 3, reps: 10, rest: 60, instructions: 'Dê um passo à frente e desça até formar 90 graus' },
+          { name: 'Levantamento terra', sets: 3, reps: 8, rest: 90, instructions: 'Mantenha as costas retas e levante a barra do chão' },
+          { name: 'Elevação lateral', sets: 3, reps: 12, rest: 45, instructions: 'Levante os halteres lateralmente até a altura dos ombros' },
+          { name: 'Desenvolvimento', sets: 3, reps: 10, rest: 60, instructions: 'Empurre os halteres para cima, acima da cabeça' },
+          { name: 'Panturrilha em pé', sets: 4, reps: 15, rest: 30, instructions: 'Fique na ponta dos pés e desça lentamente' }
+        ]
+      }
+    ];
+
+    return basePlans.slice(0, profile.gym_days_per_week).map((plan, index) => ({
+      id: `fallback-workout-${index + 1}-${Date.now()}`,
+      user_id: profile.id,
+      name: plan.name,
+      muscle_groups: plan.muscle_groups,
+      duration: plan.duration,
+      difficulty: 'intermediate',
+      exercises: plan.exercises.map((exercise, exerciseIndex) => ({
+        id: `exercise-${exerciseIndex + 1}-${Date.now()}`,
+        name: exercise.name,
+        sets: exercise.sets,
+        reps: exercise.reps,
+        rest_seconds: exercise.rest,
+        instructions: exercise.instructions,
+        muscle_group: plan.muscle_groups[0],
+        equipment: 'Halteres, Barra, Banco'
+      })),
+      created_at: new Date().toISOString(),
+      started_at: null,
+      completed_at: null
+    }));
   }
 
   async generateNutritionPlan(profile: UserProfile): Promise<NutritionPlan> {
@@ -398,8 +493,114 @@ DIRETRIZES OBRIGATÓRIAS:
 - IMPORTANTE: Use SEMPRE português brasileiro para meal_type: "Café da Manhã", "Almoço", "Lanche", "Jantar"
 `;
 
-    const response = await this.generateContent(prompt);
-    return this.parseNutritionPlan(response);
+    try {
+      const response = await this.generateContent(prompt);
+      return this.parseNutritionPlan(response);
+    } catch (error: any) {
+      if (error.message === 'SERVICE_OVERLOADED') {
+        console.log('Usando fallback para plano nutricional...');
+        return this.generateFallbackNutritionPlan(profile);
+      }
+      throw error;
+    }
+  }
+
+  private generateFallbackNutritionPlan(profile: UserProfile): NutritionPlan {
+    console.log('Gerando plano nutricional básico (fallback)...');
+    
+    const baseCalories = profile.gender === 'male' ? 2000 : 1800;
+    const adjustedCalories = Math.round(baseCalories * (profile.activity_level === 'high' ? 1.2 : 1.0));
+    
+    return {
+      id: `fallback-${Date.now()}`,
+      user_id: profile.id,
+      created_at: new Date().toISOString(),
+      meals: [
+        {
+          id: `meal-1-${Date.now()}`,
+          meal_type: 'breakfast',
+          name: 'Café da Manhã Completo',
+          suggested_time: '07:00-08:00',
+          description: 'Refeição energética para começar o dia com disposição',
+          calories: Math.round(adjustedCalories * 0.25),
+          protein: 25,
+          carbs: 45,
+          fat: 15,
+          fiber: 8,
+          meal_foods: [
+            { name: 'Aveia', quantity: '50g', calories: 200, protein: 7, carbs: 35, fat: 4 },
+            { name: 'Banana', quantity: '1 unidade', calories: 100, protein: 1, carbs: 25, fat: 0 },
+            { name: 'Leite desnatado', quantity: '200ml', calories: 80, protein: 6, carbs: 8, fat: 2 },
+            { name: 'Mel', quantity: '1 colher de sopa', calories: 60, protein: 0, carbs: 15, fat: 0 }
+          ],
+          benefits: 'Fornece energia sustentada, proteínas para recuperação muscular e fibras para saciedade',
+          instructions: 'Misture a aveia com o leite, adicione a banana cortada e finalize com mel',
+          tips: 'Pode adicionar nozes ou sementes para mais proteínas e gorduras boas'
+        },
+        {
+          id: `meal-2-${Date.now()}`,
+          meal_type: 'lunch',
+          name: 'Almoço Balanceado',
+          suggested_time: '12:00-13:00',
+          description: 'Refeição principal com carboidratos, proteínas e vegetais',
+          calories: Math.round(adjustedCalories * 0.35),
+          protein: 35,
+          carbs: 50,
+          fat: 20,
+          fiber: 12,
+          meal_foods: [
+            { name: 'Arroz integral', quantity: '100g', calories: 120, protein: 3, carbs: 25, fat: 1 },
+            { name: 'Frango grelhado', quantity: '150g', calories: 250, protein: 45, carbs: 0, fat: 8 },
+            { name: 'Salada verde', quantity: '100g', calories: 20, protein: 2, carbs: 4, fat: 0 },
+            { name: 'Azeite extra virgem', quantity: '1 colher de sopa', calories: 120, protein: 0, carbs: 0, fat: 14 }
+          ],
+          benefits: 'Proteínas para construção muscular, carboidratos para energia e vegetais para vitaminas',
+          instructions: 'Grelhe o frango temperado, prepare o arroz e monte a salada com azeite',
+          tips: 'Varie os vegetais e temperos para não enjoar'
+        },
+        {
+          id: `meal-3-${Date.now()}`,
+          meal_type: 'snack',
+          name: 'Lanche da Tarde',
+          suggested_time: '15:00-16:00',
+          description: 'Lanche nutritivo para manter energia até o jantar',
+          calories: Math.round(adjustedCalories * 0.15),
+          protein: 15,
+          carbs: 20,
+          fat: 8,
+          fiber: 5,
+          meal_foods: [
+            { name: 'Iogurte grego', quantity: '150g', calories: 120, protein: 15, carbs: 8, fat: 4 },
+            { name: 'Frutas vermelhas', quantity: '100g', calories: 50, protein: 1, carbs: 12, fat: 0 },
+            { name: 'Granola', quantity: '20g', calories: 80, protein: 2, carbs: 15, fat: 3 }
+          ],
+          benefits: 'Proteínas para saciedade, antioxidantes das frutas e energia dos carboidratos',
+          instructions: 'Misture o iogurte com as frutas e polvilhe a granola por cima',
+          tips: 'Use frutas da estação para melhor sabor e preço'
+        },
+        {
+          id: `meal-4-${Date.now()}`,
+          meal_type: 'dinner',
+          name: 'Jantar Leve',
+          suggested_time: '19:00-20:00',
+          description: 'Refeição noturna leve e nutritiva para finalizar o dia',
+          calories: Math.round(adjustedCalories * 0.25),
+          protein: 25,
+          carbs: 30,
+          fat: 12,
+          fiber: 8,
+          meal_foods: [
+            { name: 'Salmão grelhado', quantity: '120g', calories: 200, protein: 30, carbs: 0, fat: 10 },
+            { name: 'Batata doce', quantity: '100g', calories: 100, protein: 2, carbs: 25, fat: 0 },
+            { name: 'Brócolis', quantity: '80g', calories: 30, protein: 3, carbs: 6, fat: 0 },
+            { name: 'Azeite', quantity: '1 colher de chá', calories: 40, protein: 0, carbs: 0, fat: 5 }
+          ],
+          benefits: 'Ômega-3 do salmão, carboidratos complexos da batata doce e vitaminas dos vegetais',
+          instructions: 'Grelhe o salmão, asse a batata doce e refogue o brócolis com azeite',
+          tips: 'Pode substituir o salmão por outros peixes ou frango'
+        }
+      ]
+    };
   }
 
   async generateGoalSuggestions(profile: UserProfile): Promise<string[]> {
