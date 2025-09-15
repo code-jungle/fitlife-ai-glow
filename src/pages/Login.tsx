@@ -43,9 +43,12 @@ const Login = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center mb-4">
+          <button 
+            onClick={() => navigate('/')}
+            className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center mb-4 hover:scale-105 transition-transform duration-200 cursor-pointer"
+          >
             <Dumbbell className="w-8 h-8 text-white" />
-          </div>
+          </button>
           <h1 className="text-3xl font-orbitron font-bold gradient-text">
             FitLife AI
           </h1>
