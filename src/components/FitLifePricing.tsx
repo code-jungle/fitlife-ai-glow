@@ -1,8 +1,11 @@
 import { Check, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 const FitLifePricing = () => {
+  const navigate = useNavigate();
+  
   return (
     <section className="py-24 relative overflow-hidden">
       {/* Background Elements */}
@@ -63,7 +66,10 @@ const FitLifePricing = () => {
             </div>
 
             {/* CTA Button */}
-            <Button className="btn-primary w-full text-lg py-4 h-auto">
+            <Button 
+              className="btn-primary w-full text-lg py-4 h-auto"
+              onClick={() => navigate('/register')}
+            >
               Começar Teste Gratuito
             </Button>
             

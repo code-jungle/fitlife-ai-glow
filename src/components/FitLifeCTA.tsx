@@ -1,8 +1,11 @@
 import { ArrowRight, Sparkles, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 const FitLifeCTA = () => {
+  const navigate = useNavigate();
+  
   const benefits = [
     "Treinos personalizados por IA",
     "Planos nutricionais adaptativos", 
@@ -45,7 +48,10 @@ const FitLifeCTA = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button className="btn-primary text-lg px-12 py-4 h-auto hover-glow">
+              <Button 
+                className="btn-primary text-lg px-12 py-4 h-auto hover-glow"
+                onClick={() => navigate('/register')}
+              >
                 <span>Começar Gratuitamente</span>
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
