@@ -2,11 +2,9 @@ import { TrendingDown, TrendingUp, Target, Weight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ProfileStepProps, FitnessGoal } from "@/types/profile";
 
-interface GoalsStepProps {
-  data: any;
-  updateData: (data: any) => void;
-}
+interface GoalsStepProps extends ProfileStepProps {}
 
 const GoalsStep = ({ data, updateData }: GoalsStepProps) => {
   const goals = [

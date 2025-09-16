@@ -2,11 +2,9 @@ import { User, Calendar, Ruler, Weight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { ProfileStepProps, Gender } from "@/types/profile";
 
-interface PersonalInfoStepProps {
-  data: any;
-  updateData: (data: any) => void;
-}
+interface PersonalInfoStepProps extends ProfileStepProps {}
 
 const PersonalInfoStep = ({ data, updateData }: PersonalInfoStepProps) => {
   const handleGenderSelect = (gender: string) => {

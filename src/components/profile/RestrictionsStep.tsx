@@ -2,11 +2,9 @@ import { AlertCircle, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ProfileStepProps } from "@/types/profile";
 
-interface RestrictionsStepProps {
-  data: any;
-  updateData: (data: any) => void;
-}
+interface RestrictionsStepProps extends ProfileStepProps {}
 
 const RestrictionsStep = ({ data, updateData }: RestrictionsStepProps) => {
   const allergies = [

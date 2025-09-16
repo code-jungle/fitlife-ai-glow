@@ -56,7 +56,7 @@ const NutritionPlans = () => {
         });
         // Usar geração local como fallback
         const nutritionData = generateNutritionFromProfile(profile);
-        const { error } = await createNutritionPlan(nutritionData as any);
+        const { error } = await createNutritionPlan(nutritionData);
         if (!error) {
                       toast({
                         title: "Sugestão nutricional gerada!",
@@ -138,7 +138,7 @@ const NutritionPlans = () => {
 
       console.log('Nutrition data to save:', nutritionData);
 
-      const { error } = await createNutritionPlan(nutritionData as any);
+        const { error } = await createNutritionPlan(nutritionData);
       
       if (!error) {
                     toast({
@@ -198,7 +198,7 @@ const NutritionPlans = () => {
     }
   };
 
-  const generateNutritionFromProfile = (profile: any) => {
+  const generateNutritionFromProfile = (profile: UserProfile) => {
     const { fitness_goal, target_calories, target_protein, target_carbs, target_fat, dietary_restrictions, allergies } = profile;
     
     // Use target macros from profile or calculate defaults

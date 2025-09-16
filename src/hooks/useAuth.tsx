@@ -1,14 +1,15 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { ApiResponse } from '@/types/api';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<ApiResponse<User>>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<ApiResponse<User>>;
   signOut: () => Promise<void>;
 }
 
@@ -51,10 +52,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<ApiResponse<User>> => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -65,28 +66,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           description: error.message,
           variant: "destructive",
         });
+        return { data: null, error: { message: error.message, code: error.message } };
       } else {
         toast({
           title: "Login realizado com sucesso!",
           description: "Bem-vindo de volta ao FitLife AI",
         });
+        return { data: data.user, error: null };
       }
-      
-      return { error };
     } catch (error) {
       console.error('Error signing in:', error);
-      return { error };
+      return { 
+        data: null, 
+        error: { 
+          message: error instanceof Error ? error.message : 'Erro desconhecido',
+          code: 'UNKNOWN_ERROR'
+        } 
+      };
     } finally {
       setLoading(false);
     }
   };
 
-  const signUp = async (email: string, password: string, fullName?: string) => {
+  const signUp = async (email: string, password: string, fullName?: string): Promise<ApiResponse<User>> => {
     try {
       setLoading(true);
       const redirectUrl = `${window.location.origin}/`;
       
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -103,17 +110,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           description: error.message,
           variant: "destructive",
         });
+        return { data: null, error: { message: error.message, code: error.message } };
       } else {
         toast({
           title: "Cadastro realizado com sucesso!",
           description: "Verifique seu email para confirmar a conta",
         });
+        return { data: data.user, error: null };
       }
-      
-      return { error };
     } catch (error) {
       console.error('Error signing up:', error);
-      return { error };
+      return { 
+        data: null, 
+        error: { 
+          message: error instanceof Error ? error.message : 'Erro desconhecido',
+          code: 'UNKNOWN_ERROR'
+        } 
+      };
     } finally {
       setLoading(false);
     }

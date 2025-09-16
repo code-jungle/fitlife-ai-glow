@@ -60,25 +60,21 @@ class GeminiService {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`Enviando prompt para Gemini... (tentativa ${attempt}/${maxRetries})`);
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
         
-        console.log('Resposta recebida do Gemini:', text.substring(0, 200) + '...');
         return text;
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(`Erro na tentativa ${attempt}:`, error);
         
         // Verificar se é erro 503 (Service Unavailable)
-        if (error.message?.includes('503') || error.message?.includes('overloaded')) {
+        if (error instanceof Error && (error.message?.includes('503') || error.message?.includes('overloaded'))) {
           if (attempt < maxRetries) {
             const delay = attempt * 2000; // 2s, 4s, 6s
-            console.log(`Serviço sobrecarregado. Aguardando ${delay}ms antes da próxima tentativa...`);
             await new Promise(resolve => setTimeout(resolve, delay));
             continue;
           } else {
-            console.error('Máximo de tentativas atingido. Usando fallback...');
             throw new Error('SERVICE_OVERLOADED');
           }
         }
@@ -93,8 +89,6 @@ class GeminiService {
 
   private parseWorkoutPlan(text: string): WorkoutPlan {
     try {
-      console.log('Processando resposta do treino...');
-      
       // Tentar extrair JSON do texto retornado
       let jsonMatch = text.match(/\{[\s\S]*\}/);
       
@@ -115,12 +109,10 @@ class GeminiService {
       }
       
       if (!jsonMatch) {
-        console.error('Nenhum JSON encontrado na resposta:', text);
         throw new Error('Formato de resposta inválido');
       }
       
       const workoutData = JSON.parse(jsonMatch[0]);
-      console.log('Dados do treino parseados:', workoutData);
       
       return {
         name: workoutData.name || 'Treino Personalizado',
@@ -130,8 +122,6 @@ class GeminiService {
         exercises: workoutData.exercises || []
       };
     } catch (error) {
-      console.error('Erro ao processar plano de treino:', error);
-      console.error('Texto original:', text);
       // Retornar plano padrão em caso de erro
       return {
         name: 'Treino Personalizado',
@@ -145,8 +135,6 @@ class GeminiService {
 
   private parseMultipleWorkoutPlans(text: string): WorkoutPlan[] {
     try {
-      console.log('Processando resposta dos treinos múltiplos...');
-      
       // Tentar extrair JSON do texto retornado
       let jsonMatch = text.match(/\[[\s\S]*\]/);
       
@@ -167,23 +155,21 @@ class GeminiService {
       }
       
       if (!jsonMatch) {
-        console.error('Nenhum JSON encontrado na resposta:', text);
         throw new Error('Formato de resposta inválido');
       }
       
       const workoutData = JSON.parse(jsonMatch[0]);
-      console.log('Dados dos treinos parseados:', workoutData);
       
       if (!Array.isArray(workoutData)) {
         throw new Error('Resposta deve ser um array de treinos');
       }
       
-      return workoutData.map((workout: any) => ({
+      return workoutData.map((workout: Record<string, unknown>) => ({
         name: workout.name || 'Treino Personalizado',
         description: workout.description || 'Treino gerado pela IA',
         duration_minutes: workout.duration_minutes || 60,
         difficulty_level: workout.difficulty_level || 'intermediate',
-        exercises: (workout.exercises || []).map((exercise: any, index: number) => {
+        exercises: (workout.exercises || []).map((exercise: Record<string, unknown>, index: number) => {
           // Validar e corrigir repetições absurdas
           let reps = exercise.reps || 10;
           if (typeof reps === 'string') {
@@ -193,7 +179,6 @@ class GeminiService {
           }
           // Limitar a 20 repetições máximo
           if (reps > 20) {
-            console.warn(`Repetições absurdas detectadas: ${reps}, limitando a 20`);
             reps = 20;
           }
           // Garantir mínimo de 4 repetições
@@ -208,15 +193,12 @@ class GeminiService {
         })
       }));
     } catch (error) {
-      console.error('Erro ao processar resposta dos treinos:', error);
       throw new Error('Falha ao processar planos de treino');
     }
   }
 
   private parseNutritionPlan(text: string): NutritionPlan {
     try {
-      console.log('Processando resposta do plano nutricional...');
-      
       // Tentar extrair JSON do texto retornado
       let jsonMatch = text.match(/\{[\s\S]*\}/);
       
@@ -237,12 +219,10 @@ class GeminiService {
       }
       
       if (!jsonMatch) {
-        console.error('Nenhum JSON encontrado na resposta:', text);
         throw new Error('Formato de resposta inválido');
       }
       
       const nutritionData = JSON.parse(jsonMatch[0]);
-      console.log('Dados do plano nutricional parseados:', nutritionData);
       
       return {
         name: nutritionData.name || 'Plano Nutricional Personalizado',
@@ -251,8 +231,6 @@ class GeminiService {
         meals: nutritionData.meals || []
       };
     } catch (error) {
-      console.error('Erro ao processar plano nutricional:', error);
-      console.error('Texto original:', text);
       // Retornar plano padrão em caso de erro
       return {
         name: 'Plano Nutricional Personalizado',
@@ -333,9 +311,8 @@ class GeminiService {
     try {
       const response = await this.generateContent(prompt);
       return this.parseMultipleWorkoutPlans(response);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.message === 'SERVICE_OVERLOADED') {
-        console.log('Usando fallback para planos de treino...');
         return this.generateFallbackWorkoutPlans(profile);
       }
       throw error;
@@ -343,8 +320,6 @@ class GeminiService {
   }
 
   private generateFallbackWorkoutPlans(profile: UserProfile): WorkoutPlan[] {
-    console.log('Gerando planos de treino básicos (fallback)...');
-    
     const basePlans = [
       {
         name: 'Treino A - Peito e Tríceps',
@@ -496,7 +471,7 @@ DIRETRIZES OBRIGATÓRIAS:
     try {
       const response = await this.generateContent(prompt);
       return this.parseNutritionPlan(response);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.message === 'SERVICE_OVERLOADED') {
         console.log('Usando fallback para plano nutricional...');
         return this.generateFallbackNutritionPlan(profile);
@@ -627,7 +602,6 @@ Exemplo: ["Perder 5kg em 3 meses", "Treinar 4x por semana", "Consumir 2L de águ
       }
       return [];
     } catch (error) {
-      console.error('Erro ao gerar sugestões de metas:', error);
       return [];
     }
   }

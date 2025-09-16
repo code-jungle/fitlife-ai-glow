@@ -149,7 +149,7 @@ const WorkoutPlans = () => {
     }
   };
 
-  const generateWorkoutFromProfile = (profile: any) => {
+  const generateWorkoutFromProfile = (profile: UserProfile) => {
     const { fitness_goal, activity_level } = profile;
     
     // Determine workout type based on fitness goal

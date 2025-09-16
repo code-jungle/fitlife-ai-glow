@@ -10,20 +10,20 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children, skipProfileCheck = false }: ProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
-  const { isProfileComplete, loading: profileLoading } = useProfileValidation({ skipValidation: skipProfileCheck });
+  const { isProfileComplete } = useProfileValidation({ skipValidation: skipProfileCheck });
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!authLoading && !profileLoading) {
+    if (!authLoading) {
       if (!user) {
         navigate('/login');
       } else if (!skipProfileCheck && !isProfileComplete) {
         navigate('/profile-setup');
       }
     }
-  }, [user, authLoading, profileLoading, isProfileComplete, navigate, skipProfileCheck]);
+  }, [user, authLoading, isProfileComplete, navigate, skipProfileCheck]);
 
-  if (authLoading || profileLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">

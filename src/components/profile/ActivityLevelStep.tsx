@@ -3,14 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ProfileStepProps, ActivityLevel } from "@/types/profile";
 
-interface ActivityLevelStepProps {
-  data: any;
-  updateData: (data: any) => void;
-}
+interface ActivityLevelStepProps extends ProfileStepProps {}
 
 const ActivityLevelStep = ({ data, updateData }: ActivityLevelStepProps) => {
-  const activityLevels = [
+  const activityLevels: Array<{
+    id: ActivityLevel;
+    title: string;
+    description: string;
+    details: string;
+    icon: React.ComponentType<{ className?: string }>;
+    color: string;
+  }> = [
     {
       id: "sedentary",
       title: "Sedentário",
