@@ -24,7 +24,7 @@ const ProfileSetup = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, updateProfile, loading } = useProfile();
-  const { isProfileComplete, loading: profileValidationLoading } = useProfileValidation({ skipValidation: true });
+  const { isProfileComplete } = useProfileValidation({ skipValidation: true });
   const [currentStep, setCurrentStep] = useState(1);
   const [profileData, setProfileData] = useState({
     // Personal Info
@@ -50,7 +50,7 @@ const ProfileSetup = () => {
     }
 
     // If profile is already complete, redirect to dashboard
-    if (!profileValidationLoading && isProfileComplete) {
+    if (profile && isProfileComplete(profile)) {
       navigate('/dashboard');
       return;
     }
@@ -69,17 +69,17 @@ const ProfileSetup = () => {
         dietaryRestrictions: profile.dietary_restrictions || [],
       });
     }
-  }, [user, profile, navigate, isProfileComplete, profileValidationLoading]);
+  }, [user, profile, navigate, isProfileComplete]);
 
   const progress = (currentStep / steps.length) * 100;
 
-  // Show loading while checking if profile is complete
-  if (profileValidationLoading) {
+  // Show loading while profile is being fetched
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white/70">Verificando perfil...</p>
+          <p className="text-white/70">Carregando perfil...</p>
         </div>
       </div>
     );

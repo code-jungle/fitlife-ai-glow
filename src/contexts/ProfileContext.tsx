@@ -55,7 +55,7 @@ export const ProfileProvider = ({ children, initialStep = 1 }: ProfileProviderPr
     if (profile && !profileData.age) {
       setProfileData({
         age: profile.age || 0,
-        gender: profile.gender || "",
+        gender: profile.gender || "other",
         height: profile.height || 0,
         weight: profile.weight || 0,
         activity_level: profile.activity_level || "moderate",
@@ -100,10 +100,10 @@ export const ProfileProvider = ({ children, initialStep = 1 }: ProfileProviderPr
     try {
       setProfileError(null);
       await updateProfile({
-        age: parseInt(profileData.age as string),
+        age: profileData.age as number,
         gender: profileData.gender as any,
-        height: parseFloat(profileData.height as string),
-        weight: parseFloat(profileData.weight as string),
+        height: profileData.height as number,
+        weight: profileData.weight as number,
         activity_level: profileData.activity_level as any,
         fitness_goal: profileData.fitness_goal as any,
         gym_days_per_week: profileData.gym_days_per_week as number,
