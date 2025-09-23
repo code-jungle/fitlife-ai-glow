@@ -8,6 +8,7 @@ import Index from "@/pages/Index";
 import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import CompleteRegistration from "@/pages/CompleteRegistration";
 import ProfileSetup from "@/pages/ProfileSetup";
 import ProfileManagement from "@/pages/ProfileManagement";
 import GoalsTracking from "@/pages/GoalsTracking";
@@ -27,9 +28,10 @@ const RouterContent = () => {
             <Index />
           </RedirectIfLoggedIn>
         } />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/register-complete" element={<CompleteRegistration />} />
+            <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
